@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Pelancaran Bulan Kemerdekaan 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<section id="puzzle-screen">
+  <header>
+    <span class="eyebrow"><span class="star-icon">✦</span> SMK Kadok</span>
+    <p>Perasmian Pelancaran Bulan Kemerdekaan 2026</p>
+    <div id="progress-wrap">
+      <span id="progress-text">0 / 4</span>
+      <div id="progress-bar"><div id="progress-fill"></div></div>
+    </div>
+  </header>
+
+  <div id="stage-outer">
+    <div id="stage">
+      <div id="board">
+        <img id="ghost" alt="" draggable="false">
+        <svg id="grid-overlay"></svg>
+      </div>
+      <div id="caption">Merdeka</div>
+      <!-- pieces injected here -->
+    </div>
+  </div>
+</section>
+
+<section id="loading-screen">
+  <div class="load-rings">
+    <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+    <span class="load-core"></span>
+  </div>
+  <div class="load-text">Opening the Dome</div>
+</section>
+<div id="flash-strobe"></div>
+
+<section id="reveal-screen">
+  <img id="reveal-img" alt="The completed night sky" draggable="false">
+  <div id="reveal-hint">tap the sky to begin again</div>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>
