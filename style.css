@@ -11,7 +11,14 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background: var(--bg-deep);
+    /* To use your own background photo: put the image file next
+       to index.html and set its filename below. The dark overlay
+       (rgba layer) keeps text readable on top of any photo — you
+       can adjust its darkness by changing the 0.72 opacity value. */
+    background:
+      linear-gradient(rgba(11,15,35,0.72), rgba(11,15,35,0.72)),
+      url('background.jpg') center/cover no-repeat fixed,
+      var(--bg-deep);
     color: var(--ivory);
     font-family:'Space Grotesk', sans-serif;
     min-height:100vh;
@@ -22,10 +29,14 @@
 
   /* ---------- shared bits ---------- */
   .eyebrow{
-    font: 60px 'Space Grotesk', sans-serif; letter-spacing:.22em; text-transform:uppercase;
+    font-size:16px; letter-spacing:.22em; text-transform:uppercase;
     color: var(--gold-soft); font-weight:600; opacity:.85;
   }
-  .star-icon{ display:inline-block; transform: translateY(-1px); }
+  .school-logo{
+    display:inline-block; height:16px; width:16px;
+    object-fit:cover; border-radius:50%;
+    vertical-align:-3px; margin-right:4px;
+  }
 
   /* ---------- screens ---------- */
   #puzzle-screen, #reveal-screen{
@@ -43,17 +54,17 @@
   }
   header .eyebrow{ display:block; margin-bottom:6px; }
   header h1{
-    margin:0; font-weight:600; font-size:50px; letter-spacing:.04em;
+    margin:0; font-weight:600; font-size:34px; letter-spacing:.04em;
     background: linear-gradient(180deg, var(--gold-soft), var(--gold));
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
   header p{
-    margin:8px auto 0; max-width:640px; font-size:30px; line-height:1.5;
+    margin:8px auto 0; max-width:340px; font-size:13px; line-height:1.5;
     color: rgba(243,235,216,0.6);
   }
   #progress-wrap{
     display:flex; align-items:center; justify-content:center; gap:8px;
-    margin-top:14px; font-size:50px; letter-spacing:.14em; color:var(--gold-soft);
+    margin-top:14px; font-size:11px; letter-spacing:.14em; color:var(--gold-soft);
   }
   #progress-bar{
     width:140px; height:6px; background: rgba(231,183,80,0.15); border-radius:4px; overflow:hidden;
