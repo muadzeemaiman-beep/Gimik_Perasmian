@@ -6,7 +6,7 @@
   // 1920x1080 (16:9) landscape ratio, scaled to fit the mobile stage
   const SW = 190;        // core piece width (px)
   const SH = 107;        // core piece height (px)
-  const PAD = 38;        // tab overflow padding
+  const PAD = Math.ceil(Math.max(SW, SH) * 0.34) + 8; 
   const PIECE_W = SW + PAD*2;
   const PIECE_H = SH + PAD*2;
   const BOARD_W = SW*COLS, BOARD_H = SH*ROWS;
@@ -35,13 +35,12 @@
 
   // ---------------- generate scene image ----------------
   function generateSceneDataURL(w, h){
-    const scale = 2; // crisper
+    const scale = 2; 
     const c = document.createElement('canvas');
     c.width = w*scale; c.height = h*scale;
     const ctx = c.getContext('2d');
     ctx.scale(scale, scale);
 
-    // sky gradient
     const g = ctx.createLinearGradient(0,0,0,h);
     g.addColorStop(0,'#0d1230');
     g.addColorStop(.55,'#151a45');
@@ -49,14 +48,12 @@
     ctx.fillStyle = g;
     ctx.fillRect(0,0,w,h);
 
-    // subtle nebula wash
     const neb = ctx.createRadialGradient(w*0.7,h*0.25,10,w*0.7,h*0.25,w*0.6);
     neb.addColorStop(0,'rgba(200,107,122,0.14)');
     neb.addColorStop(1,'rgba(200,107,122,0)');
     ctx.fillStyle = neb;
     ctx.fillRect(0,0,w,h);
 
-    // moon
     const mx = w*0.78, my = h*0.22, mr = w*0.10;
     ctx.save();
     ctx.shadowColor = 'rgba(231,183,80,0.65)';
@@ -69,8 +66,6 @@
       ctx.beginPath(); ctx.arc(mx+cr[0]*mr, my+cr[1]*mr, cr[2]*mr, 0, Math.PI*2); ctx.fill();
     });
 
-    // stars
-    const starPts = [];
     for(let i=0;i<130;i++){
       const x = Math.random()*w, y = Math.random()*h*0.9;
       const r = Math.random()*1.4+0.3;
@@ -79,7 +74,6 @@
       ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
     }
 
-    // constellation (fixed pattern, scaled to canvas)
     const constel = [
       [0.15,0.62],[0.24,0.48],[0.34,0.52],[0.30,0.68],
       [0.42,0.40],[0.50,0.55],[0.44,0.72],[0.58,0.30],[0.20,0.32]
@@ -102,7 +96,6 @@
       ctx.restore();
     });
 
-    // comet streak
     ctx.save();
     ctx.translate(w*0.08, h*0.15);
     ctx.rotate(0.5);
@@ -117,40 +110,13 @@
     return c.toDataURL('image/png');
   }
 
-  // ============================================================
-  // TO USE YOUR OWN PICTURE: put the image file next to this
-  // script (or a full https:// URL) and set IMAGE_SRC below.
-  // Leave it as '' to keep the generated night-sky artwork.
-  //   const IMAGE_SRC = 'my-photo.jpg';
-  //   const IMAGE_SRC = 'images/my-photo.jpg';
-  //   const IMAGE_SRC = 'https://example.com/my-photo.jpg';
-  // ============================================================
   const IMAGE_SRC = 'https://upload.wikimedia.org/wikipedia/commons/6/66/Flag_of_Malaysia.svg';
-
-  // ============================================================
-  // OPTIONAL: show a DIFFERENT picture on the final "single
-  // picture" screen after the puzzle is solved (e.g. a reveal
-  // or prize image, instead of just re-showing the puzzle art).
-  // Leave it as '' to reuse IMAGE_SRC / the generated artwork.
-  //   const REVEAL_IMAGE_SRC = 'reveal.jpg';
-  //   const REVEAL_IMAGE_SRC = 'https://example.com/reveal.jpg';
-  // ============================================================
   const REVEAL_IMAGE_SRC = 'bendera.jpg';
 
-  // ============================================================
-  // OPTIONAL: play your own sound effects. Put audio files next
-  // to this script (or full https:// URLs) and set the SRCs
-  // below. Leave any one as '' to use a built-in synthesized
-  // sound instead (no file needed for any of them).
-  //   const SNAP_SOUND_SRC = 'snap.mp3';
-  //   const LOADING_SOUND_SRC = 'whoosh.mp3';
-  //   const COMPLETE_SOUND_SRC = 'complete.mp3';
-  // ============================================================
   const SNAP_SOUND_SRC = 'puzzlefinal.mp3';
   const LOADING_SOUND_SRC = 'merdekashort.mp3';
   const COMPLETE_SOUND_SRC = 'bungapi.mp3';
 
-  // ---------------- shared audio setup ----------------
   let audioCtx = null;
   function getAudioCtx(){
     if(!audioCtx){
@@ -161,8 +127,7 @@
     if(audioCtx.state === 'suspended'){ audioCtx.resume(); }
     return audioCtx;
   }
-  // unlock/create the audio context on the very first touch, since
-  // browsers require a user gesture before audio can play
+  
   stage.addEventListener('pointerdown', getAudioCtx, { once:true });
 
   function playFile(src, label){
@@ -170,7 +135,6 @@
     audio.play().catch(function(err){ console.warn('Could not play '+label+':', err); });
   }
 
-  // short, soft "click" when a piece locks into place
   function playSnapSound(){
     if(SNAP_SOUND_SRC){ playFile(SNAP_SOUND_SRC, 'SNAP_SOUND_SRC'); return; }
     const ctx = getAudioCtx();
@@ -192,7 +156,6 @@
     }catch(err){ console.warn('Web Audio unavailable for snap sound:', err); }
   }
 
-  // rising whoosh for the bombastic loading transition
   function playLoadingSound(){
     if(LOADING_SOUND_SRC){ playFile(LOADING_SOUND_SRC, 'LOADING_SOUND_SRC'); return; }
     const ctx = getAudioCtx();
@@ -201,7 +164,6 @@
       const t0 = ctx.currentTime;
       const dur = 1.7;
 
-      // filtered noise sweep (the "whoosh" body)
       const bufSize = ctx.sampleRate * dur;
       const buffer = ctx.createBuffer(1, bufSize, ctx.sampleRate);
       const data = buffer.getChannelData(0);
@@ -227,7 +189,6 @@
       noise.start(t0);
       noise.stop(t0+dur);
 
-      // low rumbling tone underneath, rising in pitch
       const osc = ctx.createOscillator();
       const oscGain = ctx.createGain();
       osc.type = 'sawtooth';
@@ -247,9 +208,8 @@
     if(COMPLETE_SOUND_SRC){ playFile(COMPLETE_SOUND_SRC, 'COMPLETE_SOUND_SRC'); return; }
     const ctx = getAudioCtx();
     if(!ctx) return;
-    // built-in synthesized chime (ascending arpeggio) — no file needed
     try{
-      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5 E5 G5 C6
+      const notes = [523.25, 659.25, 783.99, 1046.50]; 
       notes.forEach(function(freq, i){
         const t0 = ctx.currentTime + i*0.11;
         const osc = ctx.createOscillator();
@@ -273,20 +233,19 @@
     return new Promise(function(resolve, reject){
       if(!src){ reject(new Error('no IMAGE_SRC set')); return; }
       const img = new Image();
-      img.crossOrigin = 'anonymous'; // needed if the image is hosted on another domain with CORS enabled
+      img.crossOrigin = 'anonymous'; 
       img.onload = function(){
         try{
           const c = document.createElement('canvas');
           c.width = w; c.height = h;
           const ctx = c.getContext('2d');
-          // cover-fit crop, like CSS background-size:cover
           const scale = Math.max(w/img.naturalWidth, h/img.naturalHeight);
           const dw = img.naturalWidth*scale, dh = img.naturalHeight*scale;
           const dx = (w-dw)/2, dy = (h-dh)/2;
           ctx.drawImage(img, dx, dy, dw, dh);
           resolve(c.toDataURL('image/png'));
         }catch(err){
-          reject(err); // e.g. a cross-origin image without CORS headers taints the canvas
+          reject(err); 
         }
       };
       img.onerror = reject;
@@ -307,7 +266,6 @@
       buildPieces();
     });
 
-  // faint grid overlay lines
   (function drawGrid(){
     let s = '';
     for(let i=1;i<COLS;i++){
@@ -319,7 +277,6 @@
     gridSvg.innerHTML = s;
   })();
 
-  // ---------------- jigsaw path geometry ----------------
   function rot(x,y,deg){
     const r = deg*Math.PI/180;
     return [ x*Math.cos(r)-y*Math.sin(r), x*Math.sin(r)+y*Math.cos(r) ];
@@ -333,19 +290,15 @@
       const e = toGlobal(origin, deg, L, 0);
       return 'L '+e[0].toFixed(2)+','+e[1].toFixed(2)+' ';
     }
-    // smooth round knob: flat -> rise -> peak -> fall -> flat
-    // every join below shares a matching tangent direction with its
-    // neighbor, so the curve has no kinks and reads as perfectly round.
-    const neckX = 0.28;             // flat portion ends here (mirrored at 1-neckX)
-    const head = -sign * L * 0.30;  // signed peak bulge
+    const neckX = 0.28;             
+    const amp = sign > 0 ? 0.345 : 0.30; 
+    const head = -sign * L * amp;   
     const x0 = neckX*L, x1 = 0.5*L, x2 = (1-neckX)*L;
-    const k = 0.55 * (x1-x0);       // control offset (near the circular "magic number")
+    const k = 0.55 * (x1-x0);       
 
     const cmds = [
       ['L', [x0,0]],
-      // rise: leaves the flat edge horizontally, arrives at the peak horizontally
       ['C', [x0+k,0], [x1-k,head], [x1,head]],
-      // fall: mirrors the rise, leaves the peak horizontally, lands on the flat edge horizontally
       ['C', [x1+k,head], [x2-k,0], [x2,0]],
       ['L', [L,0]]
     ];
@@ -377,27 +330,22 @@
     return d;
   }
 
-
-  // random tab matrices
-  const H = []; // horizontal shared edges: H[r][c] between (r,c)-(r,c+1), c in 0..COLS-2
+  const H = []; 
   for(let r=0;r<ROWS;r++){ H.push([]); for(let c=0;c<COLS-1;c++){ H[r].push(Math.random()<0.5?1:-1); } }
-  const V = []; // vertical shared edges: V[r][c] between (r,c)-(r+1,c), r in 0..ROWS-2
+  const V = []; 
   for(let r=0;r<ROWS-1;r++){ V.push([]); for(let c=0;c<COLS;c++){ V[r].push(Math.random()<0.5?1:-1); } }
 
   function signFor(r,c,side){
-    // side: 'top','right','bottom','left'
     if(side==='top'){ return r===0 ? 0 : -V[r-1][c]; }
     if(side==='bottom'){ return r===ROWS-1 ? 0 : V[r][c]; }
     if(side==='left'){ return c===0 ? 0 : -H[r][c-1]; }
     if(side==='right'){ return c===COLS-1 ? 0 : H[r][c]; }
   }
 
-  // ---------------- build pieces ----------------
   const pieces = [];
   let placedCount = 0;
   let zTop = 10;
 
-  // layout: board centered at top of stage, tray below
   const stageWidth = Math.min(stage.clientWidth || 380, 420);
   const boardLeft = (stageWidth - BOARD_W)/2;
   const boardTop = 0;
@@ -411,8 +359,15 @@
 
   const order = [];
   for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) order.push([r,c]);
-  // shuffle tray order for visual variety
   for(let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=order[i]; order[i]=order[j]; order[j]=t; }
+
+  const clipDefsSvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  clipDefsSvg.setAttribute('width','0');
+  clipDefsSvg.setAttribute('height','0');
+  clipDefsSvg.style.position = 'absolute';
+  const clipDefs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+  clipDefsSvg.appendChild(clipDefs);
+  stage.appendChild(clipDefsSvg);
 
   function buildPieces(){
     order.forEach(function(rc, idx){
@@ -432,15 +387,21 @@
         signFor(r,c,'top'), signFor(r,c,'right'),
         signFor(r,c,'bottom'), signFor(r,c,'left')
       );
-      art.style.clipPath = "path('"+d+"')";
-      art.style.webkitClipPath = "path('"+d+"')";
+      const clipId = 'piece-clip-'+r+'-'+c;
+      const clipPathEl = document.createElementNS('http://www.w3.org/2000/svg','clipPath');
+      clipPathEl.setAttribute('id', clipId);
+      clipPathEl.setAttribute('clipPathUnits', 'userSpaceOnUse');
+      const pathEl = document.createElementNS('http://www.w3.org/2000/svg','path');
+      pathEl.setAttribute('d', d);
+      clipPathEl.appendChild(pathEl);
+      clipDefs.appendChild(clipPathEl);
+      art.style.clipPath = "url(#"+clipId+")";
+      art.style.webkitClipPath = "url(#"+clipId+")";
       el.appendChild(art);
 
-      // target (correct) position on board, in stage coords
       const targetX = boardLeft + c*SW - PAD;
       const targetY = boardTop + r*SH - PAD;
 
-      // tray position
       const row = Math.floor(idx/perRow), col = idx%perRow;
       const trayRowWidth = Math.min(perRow, (COLS*ROWS)-row*perRow) * (PIECE_W+gap) - gap;
       const trayLeft = (stageWidth-trayRowWidth)/2 + col*(PIECE_W+gap);
@@ -460,7 +421,6 @@
       attachDrag(el);
     });
   }
-
 
   function attachDrag(el){
     let dragging = false, offX=0, offY=0;
@@ -538,19 +498,17 @@
   }
 
   function updateProgress(){
-    // recompute from the DOM itself so this can never drift out of sync
     placedCount = stage.querySelectorAll('.piece.placed').length;
     progressText.textContent = placedCount+' / '+pieces.length;
     progressFill.style.width = (placedCount/pieces.length*100)+'%';
   }
 
-  // safety net: if a piece gets locked in by any code path, the bar still updates
   const progressObserver = new MutationObserver(function(){ updateProgress(); });
   progressObserver.observe(stage, { attributes:true, attributeFilter:['class'], subtree:true });
 
-  // ---------------- completion effect ----------------
   function celebrate(){
     board.classList.add('complete');
+    ghost.classList.add('revealed');
     caption.classList.add('show');
     playCompletionSound();
 
@@ -573,7 +531,6 @@
     setTimeout(function(){ startLoadingSequence(reduce); }, reduce ? 400 : 2100);
   }
 
-  // ---------------- bombastic loading transition ----------------
   function startLoadingSequence(reduce){
     puzzleScreen.classList.add('fade-out');
 
