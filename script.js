@@ -111,11 +111,12 @@
   }
 
   const IMAGE_SRC = 'https://upload.wikimedia.org/wikipedia/commons/6/66/Flag_of_Malaysia.svg';
-  const REVEAL_IMAGE_SRC = 'bendera.jpg';
+  const REVEAL_IMAGE_SRC = 'Poster.jpeg';
 
   const SNAP_SOUND_SRC = 'puzzlefinal.mp3';
   const LOADING_SOUND_SRC = 'merdekashort.mp3';
   const COMPLETE_SOUND_SRC = 'bungapi.mp3';
+  const REVEAL_SONG_SRC = 'lagufinal.mp3'; 
 
   let audioCtx = null;
   function getAudioCtx(){
@@ -560,6 +561,10 @@
     revealScreen.classList.add('fade-in');
     setTimeout(function(){ revealImg.classList.add('show'); }, 80);
     setTimeout(function(){ revealHint.classList.add('show'); }, 1500);
+
+    if(REVEAL_SONG_SRC){
+      playFile(REVEAL_SONG_SRC, 'REVEAL_SONG_SRC');
+    }
   }
 
   revealScreen.addEventListener('click', function(){
